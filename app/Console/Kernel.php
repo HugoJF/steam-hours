@@ -24,9 +24,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-		$schedule->command('playtime:queue -F')->everyMinute();
-		$schedule->command('playtime:fill')->everyMinute();
-		$schedule->command('playtime:deltas')->everyMinute();
+		$schedule->command('playtime:queue -F')->everyFiveMinutes();
+		$schedule->command('playtime:fill')->everyFiveMinutes();
+		$schedule->command('playtime:deltas')->everyFiveMinutes();
 
     }
 
