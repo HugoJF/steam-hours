@@ -13,6 +13,8 @@
                     <table class="table">
                         <thead>
                             <td>Date</td>
+                            <td>Deltas</td>
+                            <td>Count</td>
                             <td>Link</td>
                         </thead>
                         
@@ -21,6 +23,8 @@
                             @forelse($playtimeRequests as $request)
                                 <tr>
                                     <td>{{ $request->created_at }}</td>
+                                    <td>{{ $request->playtimeDeltas()->sum('delta') / 60 }} hours</td>
+                                    <td>{{ $request->playtimeDeltas()->count() }} games</td>
                                     <td><a href="{{ route('playtime_requests.show', $request) }}">View</a></td>
                                 </tr>
                             @empty
