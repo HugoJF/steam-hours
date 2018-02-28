@@ -24,5 +24,6 @@ Route::get('/', function () {
 
 
 Route::get('requests', 'PlaytimeRequestsController@index')->name('playtime_requests.index');
+Route::get('requests/daily', 'PlaytimeRequestsController@daily')->name('playtime_requests.daily');
 Route::get('requests/{playtime_request}', 'PlaytimeRequestsController@show')->name('playtime_requests.show');
 
