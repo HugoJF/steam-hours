@@ -49,13 +49,15 @@ class FillPlaytime extends Command
 
 			$response = SteamAPI::call()->GetOwnedGames($user->steamid)->get();
 
-			if(!property_exists($response, 'response')) {
+			if (!property_exists($response, 'response')) {
 				$this->error('Invalid response received');
+				$this->warn(SteamAPI::call()->GetOwnedGames($user->steamid)->raw()->get());
 				continue;
 			}
 
 			foreach ($response->response->games as $game) {
-				if($game->playtime_forever == 0) continue;
+				if ($game->playtime_forever == 0)
+					continue;
 
 				$gameInfo = $this->checkGameInfo($game);
 				$this->createPlaytime($request, $gameInfo, $game->playtime_forever);

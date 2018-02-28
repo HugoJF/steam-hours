@@ -28,6 +28,10 @@ class SteamAPI
 
 	private $params = [];
 
+	private $asJson = true;
+
+	private $curlMethod = 'GET';
+
 	private $response;
 
 	public function __construct($interface = null, $method = null, $version = 'v0001')
@@ -56,14 +60,46 @@ class SteamAPI
 
 		$url = "http://api.steampowered.com/{$this->interface}/{$this->method}/{$this->version}";
 
-		$response = Curl::to($url)
-						->withData(['key' => $apikey, 'format' => 'json'] + $this->params)
-						->asJson()
-						->get();
+		$response = Curl::to($url)->withData(['key' => $apikey, 'format' => 'json'] + $this->params);
+
+		if ($this->asJson) {
+			$response->asJson();
+		}
+
+		switch ($this->curlMethod) {
+			case 'POST';
+				$response = $response->post();
+				break;
+			case 'GET':
+			default:
+				$response = $response->get();
+				break;
+		}
 
 		$this->response = $response;
 
 		return $response;
+	}
+
+	public function raw()
+	{
+		$this->asJson = false;
+
+		return $this;
+	}
+
+	public function setPost()
+	{
+		$this->curlMethod = 'POST';
+
+		return $this;
+	}
+
+	public function setGet()
+	{
+		$this->curlMethod = 'GET';
+
+		return $this;
 	}
 
 	public function interface($interface)
