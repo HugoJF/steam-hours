@@ -59,7 +59,7 @@ class PlaytimeRequestsController extends Controller
 			DB::raw('SUM(playtime_deltas.delta) as total'),
 		])->groupBy(['date', 'playtime_requests.user_id'])->get();
 
-		$requestDays = PlaytimeRequest::select([
+		$requestDays = $user->playtimeRequests()->select([
 			DB::raw('DATE(created_at) as date'),
 			DB::raw('COUNT(id) as count'),
 		])->groupBy('date')->get();
