@@ -32,4 +32,9 @@ class User extends \TCG\Voyager\Models\User
 	{
 		return $this->hasMany('App\PlaytimeRequest');
 	}
+
+	public function playtimeDeltas()
+	{
+		return $this->hasManyThrough('App\PlaytimeDelta', 'App\PlaytimeRequest');
+	}
 }

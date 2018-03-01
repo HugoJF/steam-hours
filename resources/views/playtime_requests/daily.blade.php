@@ -18,10 +18,10 @@
                         
                         <tbody>
                         
-                        @forelse($daily as $day)
+                        @forelse($days as $day=> $total)
                             <tr>
-                                <td>{{ $day->date }}</td>
-                                <td>{{ round($day->sum / 60, 2) }} hours</td>
+                                <td>{{ $day }}</td>
+                                <td>{{ round($total / 60, 2) }} hours</td>
                             </tr>
                         @empty
                             <h1>No request or not logged in</h1>

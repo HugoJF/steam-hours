@@ -17,7 +17,7 @@ class PlaytimeRequestsController extends Controller
 {
 	public function index()
 	{
-		if(Auth::check()) {
+		if (Auth::check()) {
 			$requests = Auth::user()->playtimeRequests()->with('playtimes')->get();
 		} else {
 			$requests = [];
@@ -30,13 +30,33 @@ class PlaytimeRequestsController extends Controller
 
 	public function daily()
 	{
-		$daily = PlaytimeDelta::select([
+		$user = Auth::user();
+
+		$days = [];
+
+		$daily = $user->playtimeDeltas()->select([
+			DB::raw('DATE(playtime_deltas.created_at) as date'),
+			DB::raw('SUM(playtime_deltas.delta) as total'),
+		])->groupBy(['date', 'playtime_requests.user_id'])->get();
+
+		$requestDays = PlaytimeRequest::select([
 			DB::raw('DATE(created_at) as date'),
-			DB::raw('SUM(delta) as sum'),
 		])->groupBy('date')->get();
 
+		foreach ($requestDays as $requestDay) {
+			$days[ $requestDay->date ] = 0;
+		}
+
+		foreach ($daily as $day) {
+			$days[ $day->date ] = $day->total;
+		}
+
+
+		//		dd($daily->toArray());
+		//				dd($requestDays->toArray());
+
 		return view('playtime_requests.daily', [
-			'daily' => $daily,
+			'days' => $days,
 		]);
 	}
 
