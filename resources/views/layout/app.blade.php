@@ -48,9 +48,9 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="{{ route('home') }}">Home</a></li>
-                <li><a href="{{ route('playtime_requests.daily') }}">Daily</a></li>
-                <li><a href="{{ route('playtime_requests.index') }}">Requests</a></li>
+                @foreach(config('navbar.items') as $item)
+                    <li class="{{ Route::is($item['route']) ? 'active' : '' }}" ><a href="{{ route($item['route']) }}">{{ $item['title'] }}</a></li>
+                @endforeach
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 @if(Auth::check())
