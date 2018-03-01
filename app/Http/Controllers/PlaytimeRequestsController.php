@@ -15,17 +15,37 @@ use Illuminate\Support\Facades\DB;
 
 class PlaytimeRequestsController extends Controller
 {
-	public function index()
+	public function index(Request $request)
 	{
+		$options = [];
+
 		if (Auth::check()) {
-			$requests = Auth::user()->playtimeRequests()->with('playtimes')->get();
+			$requests = Auth::user()->playtimeRequests()->with('playtimes');
+
+			if ($request->input('date')) {
+				try {
+					$day = Carbon::parse($request->input('date'));
+					$nextDay = $day->copy()->addDay();
+
+					$options['title'] = 'Playtime Requests for ' . $day->toDateString();
+
+					$requests->where([
+						['created_at', '>', $day],
+						['created_at', '<', $nextDay],
+					]);
+				} catch (\Exception $e) {
+					dd($e);
+				}
+			}
+
+			$requests = $requests->get();
 		} else {
 			$requests = [];
 		}
 
 		return view('playtime_requests.index', [
 			'playtimeRequests' => $requests,
-		]);
+		] + $options);
 	}
 
 	public function daily()
@@ -37,6 +57,7 @@ class PlaytimeRequestsController extends Controller
 		$daily = $user->playtimeDeltas()->select([
 			DB::raw('DATE(playtime_deltas.created_at) as date'),
 			DB::raw('SUM(playtime_deltas.delta) as total'),
+			DB::raw('COUNT(playtime_deltas.id) as count'),
 		])->groupBy(['date', 'playtime_requests.user_id'])->get();
 
 		$requestDays = PlaytimeRequest::select([
@@ -44,16 +65,18 @@ class PlaytimeRequestsController extends Controller
 		])->groupBy('date')->get();
 
 		foreach ($requestDays as $requestDay) {
-			$days[ $requestDay->date ] = 0;
+			$days[ $requestDay->date ] = [
+				'count' => 0,
+				'total' => 0,
+			];
 		}
 
 		foreach ($daily as $day) {
-			$days[ $day->date ] = $day->total;
+			$days[ $day->date ] = [
+				'count' => $day->count,
+				'total' => $day->total,
+			];
 		}
-
-
-		//		dd($daily->toArray());
-		//				dd($requestDays->toArray());
 
 		return view('playtime_requests.daily', [
 			'days' => $days,

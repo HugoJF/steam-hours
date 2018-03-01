@@ -9,7 +9,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <h1>Playtime Requests</h1>
+                    @if(isset($title))
+                        <h1>{{ $title }}</h1>
+                    @else
+                        <h1>Playtime Requests</h1>
+                    @endif
                     <table class="table">
                         <thead>
                             <td>Date</td>
@@ -23,7 +27,7 @@
                             @forelse($playtimeRequests as $request)
                                 <tr>
                                     <td>{{ $request->created_at }}</td>
-                                    <td>{{ $request->playtimeDeltas()->sum('delta') / 60 }} hours</td>
+                                    <td>{{ round($request->playtimeDeltas()->sum('delta') / 60, 1) }} hours</td>
                                     <td>{{ $request->playtimeDeltas()->count() }} games</td>
                                     <td><a href="{{ route('playtime_requests.show', $request) }}">View</a></td>
                                 </tr>

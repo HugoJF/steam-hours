@@ -12,16 +12,22 @@
                     <h1>Playtime Requests</h1>
                     <table class="table">
                         <thead>
-                        <td>Date</td>
-                        <td>Total</td>
+                            <td>Date</td>
+                            <td>Request Count</td>
+                            <td>Total</td>
+                            <td>View</td>
                         </thead>
                         
                         <tbody>
                         
-                        @forelse($days as $day=> $total)
+                        @forelse($days as $day => $info)
                             <tr>
                                 <td>{{ $day }}</td>
-                                <td>{{ round($total / 60, 2) }} hours</td>
+                                <td>{{ $info['count'] }}</td>
+                                <td>{{ round($info['total'] / 60, 1) }} hours</td>
+                                <td><a href="{{ route('playtime_requests.index', [
+                                    'date' => $day,
+                                ]) }}">View</a></td>
                             </tr>
                         @empty
                             <h1>No request or not logged in</h1>
