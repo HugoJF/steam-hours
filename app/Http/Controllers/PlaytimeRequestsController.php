@@ -57,25 +57,24 @@ class PlaytimeRequestsController extends Controller
 		$daily = $user->playtimeDeltas()->select([
 			DB::raw('DATE(playtime_deltas.created_at) as date'),
 			DB::raw('SUM(playtime_deltas.delta) as total'),
-			DB::raw('COUNT(playtime_deltas.id) as count'),
 		])->groupBy(['date', 'playtime_requests.user_id'])->get();
 
 		$requestDays = PlaytimeRequest::select([
 			DB::raw('DATE(created_at) as date'),
+			DB::raw('COUNT(id) as count'),
 		])->groupBy('date')->get();
 
 		foreach ($requestDays as $requestDay) {
 			$days[ $requestDay->date ] = [
-				'count' => 0,
+				'count' => $requestDay->count,
 				'total' => 0,
 			];
 		}
 
 		foreach ($daily as $day) {
 			$days[ $day->date ] = [
-				'count' => $day->count,
 				'total' => $day->total,
-			];
+			] + $days[ $day->date ];
 		}
 
 		return view('playtime_requests.daily', [
