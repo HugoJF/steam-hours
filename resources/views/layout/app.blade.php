@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,10 +9,14 @@
     <meta name="author" content="">
     <link rel="icon" href="{{ asset('favicon.ico') }}">
     
-    <title>Fixed Top Navbar Example for Bootstrap</title>
+    <title>Steam Hours</title>
     
     <!-- Bootstrap core CSS -->
     <link href="{{ asset('css/bootstrap_darkly.min.css') }}" rel="stylesheet">
+    
+    
+    <link href="{{ asset('/css/dataTables.bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('/css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
     
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link href="{{ asset('css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
@@ -22,7 +25,8 @@
     <link href="navbar-fixed-top.css" rel="stylesheet">
     
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-    <!--[if lt IE 9]><script src="{{ asset('js/ie8-responsive-file-warning.js') }}"></script><![endif]-->
+    <!--[if lt IE 9]>
+    <script src="{{ asset('js/ie8-responsive-file-warning.js') }}"></script><![endif]-->
     <script src="{{ asset('js/ie-emulation-modes-warning.js') }}"></script>
     
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -49,12 +53,13 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 @foreach(config('navbar.items') as $item)
-                    <li class="{{ Route::is($item['route']) ? 'active' : '' }}" ><a href="{{ route($item['route']) }}">{{ $item['title'] }}</a></li>
+                    <li class="{{ Route::is($item['route']) ? 'active' : '' }}"><a href="{{ route($item['route']) }}">{{ $item['title'] }}</a></li>
                 @endforeach
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 @if(Auth::check())
                     <li class="active"><a>{{ Auth::user()->name }}</a></li>
+                    <li><a href="{{ route('users.settings') }}">Settings</a></li>
                     <li><a href="{{ route('logout') }}">Logout</a></li>
                 @else
                     <li><a href="{{ route('login') }}">Login</a></li>
@@ -67,7 +72,7 @@
 <div class="container">
     
     @yield('content')
-    
+
 </div> <!-- /container -->
 
 
@@ -77,7 +82,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="{{ asset('js/vendor/jquery.min.js') }}"><\/script>')</script>
 <script src="{{ asset('/js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('/js/moment.min.js') }}"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script src="{{ asset('/js/ie10-viewport-bug-workaround.js') }}"></script>
+<script src="{{ asset('/js/bootstrap-datetimepicker.min.js') }}"></script>
+<script src="{{ asset('/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('/js/dataTables.bootstrap.min.js') }}"></script>
+
+@stack('scripts')
+
 </body>
 </html>

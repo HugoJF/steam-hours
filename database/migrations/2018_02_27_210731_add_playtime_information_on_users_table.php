@@ -15,6 +15,10 @@ class AddPlaytimeInformationOnUsersTable extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->integer('playtime_expiration');
+            $table->string('request_preference')->nullable();
+            $table->dateTime('request_preference_updated_at')->nullable();
+            $table->integer('request_correction_limit')->nullable();
+            $table->string('timezone')->nullable();
         });
     }
 

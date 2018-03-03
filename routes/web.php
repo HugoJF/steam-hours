@@ -27,3 +27,5 @@ Route::get('requests', 'PlaytimeRequestsController@index')->name('playtime_reque
 Route::get('requests/daily', 'PlaytimeRequestsController@daily')->name('playtime_requests.daily');
 Route::get('requests/{playtime_request}', 'PlaytimeRequestsController@show')->name('playtime_requests.show');
 
+Route::get('settings', 'UsersController@settings')->name('users.settings');
+Route::post('settings', 'UsersController@storeSettings')->name('users.storeSettings');
