@@ -101,4 +101,9 @@ class PlaytimeRequest extends Model
 		return $saved;
 	}
 
+	public function getScore()
+	{
+		return $this->created_at->diffInMinutes() * 1;
+	}
+
 }

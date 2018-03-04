@@ -50,73 +50,112 @@ class QueuePlaytime extends Command
 	 */
 	public function handle()
 	{
+		// Get every user with his latest requests
 		$users = User::with(['playtimeRequests' => function ($q) {
 			$q->latest()->limit(1);
 		}])->get();
 
 
 		foreach ($users as $user) {
+			// Cache references
 			$preference = $user->request_preference ?? 0;
-			$correctionLimit = $user->request_correction_limit ?? 1;
+			$playtime_expiration = $user->playtime_expiration ?? 24;
+			$correction_limit = $user->request_correction_limit ?? 1;
 
+			// Gets the actual request Model for the user
 			$request = $user->playtimeRequests->first();
 
-			if ($request->created_at->isFuture()) {
-				$this->warn('Skipping user since request is already created in the future? maybe this is development...');
+			// If request exists, compute corrected time delta
+			if (!is_null($request)) {
 
-				continue;
+				// Skips user if last request is in the future (testing enviroment)
+				if ($request->created_at->isFuture()) {
+					$this->warn('Skipping user since request is already created in the future? maybe this is development...');
+
+					continue;
+				}
+
+				// Computes corrected delta
+				$correctedDelta = $this->getCorrectedDelta($request, $preference, $playtime_expiration, $correction_limit);
+
+				$this->info('Corrected diff: ' . $correctedDelta);
 			}
 
-			$diffHours = $request->created_at->diffInHours();
+			// If it's the first request or the last one is still expired after correction, create a new one
+			if (is_null($request) || $this->option('force') || (isset($correctedDelta) && $correctedDelta >= $user->playtime_expiration)) {
 
-			$this->info('Last request was at: ' . $request->created_at);
+				// Debugging if variable is present
+				if (isset($correctedDelta)) {
+					$this->info('Request is still expired after correction by ' . $correctedDelta . ' hours');
+				}
 
-			$this->info('User resolution: ' . $user->playtime_expiration);
-			$this->info('Last request expired by ' . $diffHours . ' hours');
-			$this->info('Last request relative expiration: ' . ($diffHours / $user->playtime_expiration * 100) . '%');
+				// Creates new request
+				$request = $this->createNewRequest($user);
 
-			$ahead = ($request->created_at->hour - $preference) % $user->playtime_expiration;
-
-			while ($ahead > 6) {
-				$ahead -= 12;
-			}
-
-			while ($ahead < -6) {
-				$ahead += 12;
-			}
-
-			if ($ahead > 0) {
-				$this->info('Requests are ' . $ahead . 'h ahead of preference');
-			} else {
-				$this->info('Requests are ' . -$ahead . 'h behind of preference');
-			}
-
-
-			if (abs($ahead) > $correctionLimit) {
-				$factor = $ahead / abs($ahead);
-				$ahead = $correctionLimit * $factor;
-			}
-
-			$this->info('Limited difference to ' . $ahead . ' since CorrectionLimit is set to: ' . $correctionLimit);
-
-			if ($ahead > 0) {
-				$correctedDiff = $request->created_at->subHours(abs($ahead))->diffInHours();
-			} else {
-				$correctedDiff = $request->created_at->addHours(abs($ahead))->diffInHours();
-			}
-
-			$this->info('Corrected diff: ' . $correctedDiff);
-
-			if ($correctedDiff >= $user->playtime_expiration) {
-				$this->info('Request is still expired after correction by ' . $correctedDiff . ' hours');
-
-				$request = PlaytimeRequest::make();
-				$request->user()->associate($user);
-				$request->previous()->associate(PlaytimeRequest::orderBy('created_at', 'desc')->first());
-				$request->save();
-
+				// Debugging
 				$this->info('Created request for user ' . $user->name . ': ' . $request->id);
 			}
 		}
+	}
+
+	protected function createNewRequest($user)
+	{
+		$request = PlaytimeRequest::make();
+
+		$request->user()->associate($user);
+		$request->previous()->associate(PlaytimeRequest::orderBy('created_at', 'desc')->first());
+
+		$request->save();
+
+		return $request;
+	}
+
+	protected function getCorrectedDelta($request, $preference, $playtime_expiration, $correction_limit = 1)
+	{
+		// Gets the actual difference from last request
+		$diffHours = $request->created_at->diffInHours();
+
+		// Debugging
+		$this->info('Last request was at: ' . $request->created_at);
+
+		$this->info('User resolution: ' . $playtime_expiration);
+		$this->info('Last request expired by ' . $diffHours . ' hours');
+		$this->info('Last request relative expiration: ' . ($diffHours / $playtime_expiration * 100) . '%');
+
+		// Calculates how many hours we are ahead of the actual preference time set by the user
+		$ahead = ($request->created_at->hour - intval(explode(':', $preference)[0])) % $playtime_expiration;
+
+		// Clamps the difference so we get the closest "path" to the desired update time
+		while ($ahead > 12) {
+			$ahead -= 24;
+		}
+		while ($ahead < -12) {
+			$ahead += 24;
+		}
+
+		// Debugging
+		if ($ahead > 0) {
+			$this->info('Requests are ' . $ahead . 'h ahead of preference');
+		} else {
+			$this->info('Requests are ' . -$ahead . 'h behind of preference');
+		}
+
+		// Clamps to desired limit
+		if (abs($ahead) > $correction_limit) {
+			$factor = $ahead / abs($ahead);
+			$ahead = $correction_limit * $factor;
+		}
+
+		// Debugging
+		$this->info('Limited difference to ' . $ahead . ' since CorrectionLimit is set to: ' . $correction_limit);
+
+		// Corrects the difference
+		if ($ahead > 0) {
+			$correctedDiff = $request->created_at->subHours(abs($ahead))->diffInHours();
+		} else {
+			$correctedDiff = $request->created_at->addHours(abs($ahead))->diffInHours();
+		}
+
+		return $correctedDiff;
 	}
 }

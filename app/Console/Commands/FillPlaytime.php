@@ -6,6 +6,7 @@ use App\GameInfo;
 use App\Playtime;
 use App\PlaytimeRequest;
 use App\SteamAPI;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class FillPlaytime extends Command
@@ -41,9 +42,17 @@ class FillPlaytime extends Command
 	 */
 	public function handle()
 	{
-		$requests = PlaytimeRequest::unfilled()->get();
+		$requests = PlaytimeRequest::unfilled()->with('user')->get();
 
-		foreach ($requests as $request) {
+		$requests->sortBy(function ($item, $key) {
+			return $item->getScore();
+		});
+
+		$maxRequests = 1;
+
+		while ($maxRequests-- > 0 && $requests->count() > 0) {
+
+			$request = $requests->pop();
 
 			$user = $request->user;
 
@@ -69,7 +78,7 @@ class FillPlaytime extends Command
 			$request->filled = true;
 			$request->save();
 
-			$this->info('Filled');
+			$this->info("Filled request: {$request->id}");
 		}
 	}
 
