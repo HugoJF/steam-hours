@@ -14,7 +14,15 @@ return [
 		[
 			'title' => 'Requests',
 			'route' => 'playtime_requests.index',
-		]
+		],
+		[
+			'title' => 'TreeMap',
+			'route' => 'playtime.charts.treemap',
+		],
+		[
+			'title' => 'Area Chart',
+			'route' => 'playtime.charts.area',
+		],
     ],
 
 

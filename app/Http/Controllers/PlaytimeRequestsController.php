@@ -20,7 +20,7 @@ class PlaytimeRequestsController extends Controller
 		$options = [];
 
 		if (Auth::check()) {
-			$requests = Auth::user()->playtimeRequests()->with('playtimes');
+			$requests = Auth::user()->playtimeRequests()->with('playtimeDeltas');
 
 			if ($request->input('date')) {
 				try {
@@ -38,7 +38,7 @@ class PlaytimeRequestsController extends Controller
 				}
 			}
 
-			$requests = $requests->get();
+			$requests = $requests->paginate(15);
 		} else {
 			$requests = [];
 		}

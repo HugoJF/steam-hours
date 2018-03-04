@@ -16,28 +16,31 @@
                     @endif
                     <table class="table">
                         <thead>
-                            <td>Date</td>
-                            <td>Deltas</td>
-                            <td>Count</td>
-                            <td>Date</td>
-                            <td>Link</td>
+                        <td>Date</td>
+                        <td>Deltas</td>
+                        <td>Count</td>
+                        <td>Date</td>
+                        <td>Link</td>
                         </thead>
                         
                         <tbody>
-
-                            @forelse($playtimeRequests as $request)
-                                <tr>
-                                    <td>{{ $request->created_at }}</td>
-                                    <td>{{ round($request->playtimeDeltas()->sum('delta') / 60, 1) }} hours</td>
-                                    <td>{{ $request->playtimeDeltas()->count() }} games</td>
-                                    <td>{{ $request->created_at->diffForHumans() }}</td>
-                                    <td><a href="{{ route('playtime_requests.show', $request) }}">View</a></td>
-                                </tr>
-                            @empty
-                                <h1>No request or not logged in</h1>
-                            @endforelse
+                        
+                        @forelse($playtimeRequests as $request)
+                            <tr>
+                                <td>{{ $request->created_at }}</td>
+                                <td>{{ round($request->playtimeDeltas->sum('delta') / 60, 1) }} hours</td>
+                                <td>{{ $request->playtimeDeltas->count() }} games</td>
+                                <td>{{ $request->created_at->diffForHumans() }}</td>
+                                <td><a href="{{ route('playtime_requests.show', $request) }}">View</a></td>
+                            </tr>
+                        @empty
+                            <h1>No request or not logged in</h1>
+                        @endforelse
                         </tbody>
                     </table>
+                    <div class="text-center">
+                        {{ $playtimeRequests->links() }}
+                    </div>
                 </div>
             </div>
         
