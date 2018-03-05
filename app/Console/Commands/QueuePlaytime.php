@@ -51,12 +51,12 @@ class QueuePlaytime extends Command
 	public function handle()
 	{
 		// Get every user with his latest requests
-		$users = User::with(['playtimeRequests' => function ($q) {
-			$q->latest()->limit(1);
-		}])->get();
-
+		$users = User::with('playtimeRequests')->get();
 
 		foreach ($users as $user) {
+			$this->info('###################################');
+			$this->info('Starting queuing logic for ' . $user->name);
+			$this->info('###################################');
 			// Cache references
 			$preference = $user->request_preference ?? 0;
 			$playtime_expiration = $user->playtime_expiration ?? 24;
@@ -66,7 +66,7 @@ class QueuePlaytime extends Command
 			$request = $user->playtimeRequests->first();
 
 			// If request exists, compute corrected time delta
-			if (!is_null($request)) {
+			if ($request) {
 
 				// Skips user if last request is in the future (testing enviroment)
 				if ($request->created_at->isFuture()) {
@@ -79,6 +79,8 @@ class QueuePlaytime extends Command
 				$correctedDelta = $this->getCorrectedDelta($request, $preference, $playtime_expiration, $correction_limit);
 
 				$this->info('Corrected diff: ' . $correctedDelta);
+			} else {
+				$this->warn('NO previous request present');
 			}
 
 			// If it's the first request or the last one is still expired after correction, create a new one
@@ -103,7 +105,7 @@ class QueuePlaytime extends Command
 		$request = PlaytimeRequest::make();
 
 		$request->user()->associate($user);
-		$request->previous()->associate(PlaytimeRequest::orderBy('created_at', 'desc')->first());
+		$request->previous()->associate($user->playtimeRequests()->orderBy('created_at', 'desc')->first());
 
 		$request->save();
 
