@@ -2,9 +2,9 @@
 
 return [
 
-    'items' => [
-    	[
-    		'title' => 'Home',
+	'items' => [
+		[
+			'title' => 'Home',
 			'route' => 'home',
 		],
 		[
@@ -16,14 +16,29 @@ return [
 			'route' => 'playtime_requests.index',
 		],
 		[
-			'title' => 'TreeMap',
-			'route' => 'playtime.charts.treemap',
+			'title'    => 'Charts',
+			'children' => [
+				[
+					'header' => 'Per-game stats',
+				],
+				[
+					'separator',
+				],
+				[
+					'title' => 'Area Chart',
+					'route' => 'charts.area',
+				],
+				[
+					'title' => 'Treemap',
+					'route' => 'charts.treemap',
+				],
+				[
+					'title' => 'Sankey',
+					'route' => 'charts.sankey',
+				],
+			],
 		],
-		[
-			'title' => 'Area Chart',
-			'route' => 'playtime.charts.area',
-		],
-    ],
+	],
 
 
 ];

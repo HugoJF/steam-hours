@@ -52,7 +52,7 @@
 
 
             var jsonData = $.ajax({
-                url: "{{ route('api.pergame') }}",
+                url: "{{ $api }}",
                 dataType: "json",
                 async: false
             }).responseText;

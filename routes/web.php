@@ -27,10 +27,14 @@ Route::get('requests', 'PlaytimeRequestsController@index')->name('playtime_reque
 Route::get('requests/daily', 'PlaytimeRequestsController@daily')->name('playtime_requests.daily');
 Route::get('requests/{playtime_request}', 'PlaytimeRequestsController@show')->name('playtime_requests.show');
 
-Route::get('charts/treemap/all', 'PlaytimeController@treemap')->name('playtime.charts.treemap');
-Route::get('charts/area/all', 'PlaytimeController@area')->name('playtime.charts.area');
-Route::get('api/pergame', 'PlaytimeController@perGameAPI')->name('api.pergame');
-Route::get('api/perday', 'PlaytimeController@perDayAPI')->name('api.perday');
+Route::get('charts/treemap/', 'PlaytimeController@treemap')->name('charts.treemap');
+Route::get('charts/area/', 'PlaytimeController@area')->name('charts.area');
+Route::get('charts/sankey/', 'PlaytimeController@sankey')->name('charts.sankey');
+
+
+Route::get('api/charts/treemap', 'PlaytimeController@treemapAPI')->name('api.charts.treemap');
+Route::get('api/charts/area', 'PlaytimeController@areaAPI')->name('api.charts.area');
+Route::get('api/charts/sankey', 'PlaytimeController@treemapAPI')->name('api.charts.sankey');
 
 Route::get('settings', 'UsersController@settings')->name('users.settings');
 Route::post('settings', 'UsersController@storeSettings')->name('users.storeSettings');

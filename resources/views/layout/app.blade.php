@@ -53,7 +53,24 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 @foreach(config('navbar.items') as $item)
-                    <li class="{{ Route::is($item['route']) ? 'active' : '' }}"><a href="{{ route($item['route']) }}">{{ $item['title'] }}</a></li>
+                    @if(array_key_exists('route', $item))
+                        <li class="{{ Route::is($item['route']) ? 'active' : '' }}"><a href="{{ route($item['route']) }}">{{ $item['title'] }}</a></li>
+                    @elseif(array_key_exists('children', $item))
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ $item['title'] }}<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                @foreach($item['children'] as $key => $child)
+                                    @if(array_key_exists('route', $child))
+                                        <li class="{{ Route::is($child['route']) ? 'active' : '' }}"><a href="{{ route($child['route']) }}">{{ $child['title'] }}</a></li>
+                                    @elseif(array_key_exists('header', $child))
+                                        <li class="dropdown-header">{{ $child['header'] }}</li>
+                                    @elseif(in_array('separator', $child))
+                                        <li role="separator" class="divider"></li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        </li>
+                    @endif
                 @endforeach
             </ul>
             <ul class="nav navbar-nav navbar-right">

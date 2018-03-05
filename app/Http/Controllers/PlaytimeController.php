@@ -10,15 +10,31 @@ class PlaytimeController extends Controller
 {
 	public function treemap()
 	{
-		return view('treemap');
+		return view('treemap',[
+			'api' => route('api.charts.treemap'),
+		]);
 	}
 
 	public function area()
 	{
-		return view('area');
+		return view('area', [
+			'api' => route('api.charts.area'),
+		]);
 	}
 
-	public function perGameAPI()
+	public function sankey()
+	{
+		return view('sankey', [
+			'api' => route('api.charts.sankey'),
+		]);
+	}
+
+	public function sankeyAPI()
+	{
+
+	}
+
+	public function treemapAPI()
 	{
 		$user = Auth::user();
 
@@ -43,7 +59,7 @@ class PlaytimeController extends Controller
 		return $response;
 	}
 
-	public function perDayAPI()
+	public function areaAPI()
 	{
 		$user = Auth::user();
 
