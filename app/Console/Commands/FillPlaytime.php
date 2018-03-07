@@ -48,7 +48,7 @@ class FillPlaytime extends Command
 			return $item->getScore();
 		});
 
-		$maxRequests = 1;
+		$maxRequests = 200;
 
 		while ($maxRequests-- > 0 && $requests->count() > 0) {
 

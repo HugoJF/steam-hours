@@ -38,7 +38,7 @@ class ComputePlaytimeDeltas extends Command
 	 */
 	public function handle()
 	{
-		$requests = PlaytimeRequest::notCached()->get();
+		$requests = PlaytimeRequest::filled()->notCached()->get();
 
 		foreach ($requests as $request) {
 			$request->computeDeltas();
