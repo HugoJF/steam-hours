@@ -58,6 +58,7 @@ class QueuePlaytime extends Command
 			$this->info('Starting queuing logic for ' . $user->name);
 			$this->info('###################################');
 			// Cache references
+			$force = true;
 			$preference = $user->request_preference ?? 0;
 			$playtime_expiration = $user->playtime_expiration ?? 24;
 			$correction_limit = $user->request_correction_limit ?? 1;
@@ -84,7 +85,7 @@ class QueuePlaytime extends Command
 			}
 
 			// If it's the first request or the last one is still expired after correction, create a new one
-			if (is_null($request) || $this->option('force') || (isset($correctedDelta) && $correctedDelta >= $user->playtime_expiration)) {
+			if (is_null($request) || $force || $this->option('force') || (isset($correctedDelta) && $correctedDelta >= $user->playtime_expiration)) {
 
 				// Debugging if variable is present
 				if (isset($correctedDelta)) {
