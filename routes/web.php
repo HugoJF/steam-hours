@@ -18,14 +18,14 @@ Route::group(['prefix' => 'admin'], function () {
 Route::get('login', 'AuthController@login')->name('login');
 Route::get('logout', 'Auth\LoginController@logout')->name('logout');
 
-Route::get('/', function () {
-	return redirect()->route('playtime_requests.index');
-})->name('home');
+Route::get('/', 'PlaytimeController@home')->name('home');
 
 
 Route::get('requests', 'PlaytimeRequestsController@index')->name('playtime_requests.index');
 Route::get('requests/daily', 'PlaytimeRequestsController@daily')->name('playtime_requests.daily');
 Route::get('requests/{playtime_request}', 'PlaytimeRequestsController@show')->name('playtime_requests.show');
+
+Route::get('playtime', 'PlaytimeController@show')->name('playtimes.show');
 
 Route::get('charts/treemap/', 'PlaytimeController@treemap')->name('charts.treemap');
 Route::get('charts/area/', 'PlaytimeController@area')->name('charts.area');

@@ -17,26 +17,26 @@ class PlaytimeRequestsController extends Controller
 {
 	public function index(Request $request)
 	{
-		$options = [];
+			$options = [];
 
-		if (Auth::check()) {
-			$requests = Auth::user()->playtimeRequests()->with('playtimeDeltas');
+			if (Auth::check()) {
+				$requests = Auth::user()->playtimeRequests()->with('playtimeDeltas');
 
-			if ($request->input('date')) {
-				try {
-					$day = Carbon::parse($request->input('date'));
-					$nextDay = $day->copy()->addDay();
+				if ($request->input('date')) {
+					try {
+						$day = Carbon::parse($request->input('date'));
+						$nextDay = $day->copy()->addDay();
 
-					$options['title'] = 'Playtime Requests for ' . $day->toDateString();
+						$options['title'] = 'Playtime Requests for ' . $day->toDateString();
 
-					$requests->where([
-						['created_at', '>', $day],
-						['created_at', '<', $nextDay],
-					]);
-				} catch (\Exception $e) {
-					dd($e);
+						$requests->where([
+							['created_at', '>', $day],
+							['created_at', '<', $nextDay],
+						]);
+					} catch (\Exception $e) {
+						dd($e);
+					}
 				}
-			}
 
 			$requests = $requests->paginate(15);
 		} else {

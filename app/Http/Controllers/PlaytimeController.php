@@ -2,15 +2,59 @@
 
 namespace App\Http\Controllers;
 
+use App\Playtime;
+use App\PlaytimeDelta;
+use App\PlaytimeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PlaytimeController extends Controller
 {
+	public function home(Request $request)
+	{
+		return $this->summary(Carbon::now()->toDateString());
+	}
+
+	public function show(Request $request)
+	{
+		return $this->summary($request->input('date'));
+	}
+
+	protected function summary($date)
+	{
+
+		$options = [];
+
+		$requestIds = Auth::user()->playtimeRequests();
+
+		if ($date) {
+			try {
+				$day = Carbon::parse($date);
+
+				$options['title'] = 'Playtime Requests for ' . $day->toDateString();
+
+				$requestIds = $requestIds->whereDate('created_at', '=', $day);
+			} catch (\Exception $e) {
+				dd($e);
+			}
+		}
+		$requestIds = $requestIds->select('id')->get()->pluck('id')->toArray();
+
+		$playtimes = PlaytimeDelta::with('gameinfo')->whereIn('playtime_request_id', $requestIds)->select([
+			'appid',
+			DB::raw('CAST(SUM(delta) AS UNSIGNED) AS total'),
+		])->groupBy('appid')->get()->keyBy('appid');
+
+		return view('playtimes.show', [
+				'playtimes' => $playtimes,
+			] + $options);
+	}
+
 	public function treemap()
 	{
-		return view('treemap',[
+		return view('treemap', [
 			'api' => route('api.charts.treemap'),
 		]);
 	}
@@ -42,7 +86,7 @@ class PlaytimeController extends Controller
 
 		$perGame = $user->playtimeDeltas()->with('gameinfo')->select([
 			DB::raw('appid'),
-			DB::raw('CAST(SUM(playtime_deltas.delta) AS UNSIGNED) as total'),
+			DB::raw('CAST(SUM(playtime_deltas.delta) AS UNSIGNED) AS total'),
 		])->groupBy(['appid', 'playtime_requests.user_id'])->get();
 
 		$response[] = ['Name', 'Parent', 'Size'];
