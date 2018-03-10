@@ -89,6 +89,8 @@ class PlaytimeRequest extends Model
 
 				$playtimeDelta->gameInfo()->associate(GameInfo::find($appid));
 				$playtimeDelta->playtimeRequest()->associate($this);
+				$playtimeDelta->created_at = $this->created_at;
+				$playtimeDelta->updated_at = $this->updated_at;
 
 				$playtimeDelta->save();
 			}
