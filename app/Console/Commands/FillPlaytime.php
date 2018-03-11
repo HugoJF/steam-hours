@@ -16,7 +16,7 @@ class FillPlaytime extends Command
 	 *
 	 * @var string
 	 */
-	protected $signature = 'playtime:fill';
+	protected $signature = 'playtime:fill {amount=200}';
 
 	/**
 	 * The console command description.
@@ -48,7 +48,9 @@ class FillPlaytime extends Command
 			return $item->getScore();
 		});
 
-		$maxRequests = 200;
+		$maxRequests = $this->option('amount');
+
+		$this->info("Running request filled with {$maxRequests} max requests!");
 
 		while ($maxRequests-- > 0 && $requests->count() > 0) {
 

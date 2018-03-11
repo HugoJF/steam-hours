@@ -14,6 +14,9 @@ class AddPlaytimeInformationOnUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
+        	$table->float('request_initial_score');
+        	$table->float('request_per_hour_score');
+
             $table->integer('playtime_expiration');
             $table->string('request_preference')->nullable();
             $table->dateTime('request_preference_updated_at')->nullable();

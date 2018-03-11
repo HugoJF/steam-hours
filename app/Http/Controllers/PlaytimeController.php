@@ -14,7 +14,7 @@ class PlaytimeController extends Controller
 {
 	public function home(Request $request)
 	{
-		return $this->summary(Carbon::now()->toDateString());
+		return $this->summary();
 	}
 
 	public function show(Request $request)
@@ -22,7 +22,7 @@ class PlaytimeController extends Controller
 		return $this->summary($request->input('date'));
 	}
 
-	protected function summary($date)
+	protected function summary($date = 'now')
 	{
 
 		$options = [];
@@ -75,7 +75,32 @@ class PlaytimeController extends Controller
 
 	public function sankeyAPI()
 	{
+		$user = Auth::user();
 
+		$response = [];
+		$response[] = ['Date', 'Game', 'Hours'];
+
+		$a = new \DateTimeZone($user->timezone);
+		$b = new \DateTimeZone('UTC');
+
+		$offset = $a->getOffset(new \DateTime('now', $b));
+
+		$hours = round($offset / 3600);
+		$minutes = round($offset % 3600 / 60);
+
+		$tz = sprintf('%+03d:%02d', $hours, $minutes);
+
+		$data = Auth::user()->playtimeDeltas()->with('gameinfo')->select([
+			'appid',
+			DB::raw("DATE(CONVERT_TZ(playtime_deltas.created_at, '+00:00', '$tz')) AS date"),
+			DB::raw('CAST(SUM(playtime_deltas.delta) AS UNSIGNED) AS total'),
+		])->groupBy(['date', 'appid', 'playtime_requests.user_id'])->get();
+
+		foreach ($data as $entry) {
+			$response[] = [$entry->date, $entry->gameinfo->name, round($entry->total / 60, 2)];
+		}
+
+		return $response;
 	}
 
 	public function treemapAPI()
@@ -111,7 +136,7 @@ class PlaytimeController extends Controller
 
 		$perDay = $user->playtimeDeltas()->with('gameinfo')->select([
 			DB::raw('DATE(playtime_deltas.created_at) as date'),
-			DB::raw('appid'),
+			'appid',
 			DB::raw('CAST(SUM(playtime_deltas.delta) AS UNSIGNED) as total'),
 		])->groupBy(['date', 'appid', 'playtime_requests.user_id'])->orderBy('date')->get();
 

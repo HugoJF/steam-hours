@@ -12,7 +12,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use DateTimeZone;
+use DateTime;
 class PlaytimeRequestsController extends Controller
 {
 	public function index(Request $request)
@@ -52,15 +53,25 @@ class PlaytimeRequestsController extends Controller
 	{
 		$user = Auth::user();
 
+		$a = new DateTimeZone($user->timezone);
+		$b = new DateTimeZone('UTC');
+
+		$offset = $a->getOffset(new DateTime('now', $b));
+
+		$hours = round($offset / 3600);
+		$minutes = round($offset % 3600 / 60);
+
+		$tz = sprintf('%+03d:%02d', $hours, $minutes);
+
 		$days = [];
 
 		$daily = $user->playtimeDeltas()->select([
-			DB::raw('DATE(playtime_deltas.created_at) as date'),
+			DB::raw("DATE(CONVERT_TZ(playtime_deltas.created_at, '+00:00', '$tz')) as date"),
 			DB::raw('SUM(playtime_deltas.delta) as total'),
 		])->groupBy(['date', 'playtime_requests.user_id'])->get();
 
 		$requestDays = $user->playtimeRequests()->select([
-			DB::raw('DATE(created_at) as date'),
+			DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tz')) as date"),
 			DB::raw('COUNT(id) as count'),
 		])->groupBy('date')->get();
 

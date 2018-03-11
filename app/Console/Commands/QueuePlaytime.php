@@ -58,10 +58,7 @@ class QueuePlaytime extends Command
 			$this->info('Starting queuing logic for ' . $user->name);
 			$this->info('###################################');
 			// Cache references
-			$force = true;
-			$preference = $user->request_preference ?? 0;
-			$playtime_expiration = $user->playtime_expiration ?? 24;
-			$correction_limit = $user->request_correction_limit ?? 1;
+			$force = false;
 
 			// Gets the actual request Model for the user
 			$request = $user->playtimeRequests->first();
@@ -70,14 +67,14 @@ class QueuePlaytime extends Command
 			if ($request) {
 
 				// Skips user if last request is in the future (testing enviroment)
-				if ($request->created_at->isFuture()) {
+				if ($request->created_at->tz($user->timezone)->isFuture()) {
 					$this->warn('Skipping user since request is already created in the future? maybe this is development...');
 
 					continue;
 				}
 
 				// Computes corrected delta
-				$correctedDelta = $this->getCorrectedDelta($request, $preference, $playtime_expiration, $correction_limit);
+				$correctedDelta = $this->getCorrectedDelta($request, $user);
 
 				$this->info('Corrected diff: ' . $correctedDelta);
 			} else {
@@ -113,20 +110,24 @@ class QueuePlaytime extends Command
 		return $request;
 	}
 
-	protected function getCorrectedDelta($request, $preference, $playtime_expiration, $correction_limit = 1)
+	protected function getCorrectedDelta($request, $user)
 	{
+		// Caches user variables and defaults them if needed;
+		$preference = $user->request_preference ?? 0;
+		$playtime_expiration = $user->playtime_expiration ?? 24;
+		$correction_limit = $user->request_correction_limit ?? 1;
+
 		// Gets the actual difference from last request
 		$diffHours = $request->created_at->diffInHours();
 
 		// Debugging
-		$this->info('Last request was at: ' . $request->created_at);
-
 		$this->info('User resolution: ' . $playtime_expiration);
+		$this->info('Last request was at: ' . $request->created_at);
 		$this->info('Last request expired by ' . $diffHours . ' hours');
 		$this->info('Last request relative expiration: ' . ($diffHours / $playtime_expiration * 100) . '%');
 
 		// Calculates how many hours we are ahead of the actual preference time set by the user
-		$ahead = ($request->created_at->hour - intval(explode(':', $preference)[0])) % $playtime_expiration;
+		$ahead = ($request->created_at->tz($user->timezone)->hour - intval(explode(':', $preference)[0])) % $playtime_expiration;
 
 		// Clamps the difference so we get the closest "path" to the desired update time
 		while ($ahead > 12) {

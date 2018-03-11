@@ -55,32 +55,37 @@ class PlaytimeRequest extends Model
 
 	public function computeDeltas()
 	{
+		// Check for previous request
 		if (!$this->previous) {
 			return false;
 		}
 
+		// Load playtimes filled from Steam
 		$this->load('playtimes');
 		$previousRequest = $this->previous()->with('playtimes')->first();
 
+		// Playtimes keyed by appid
 		$actual = [];
 		$previous = [];
 
+		// Fill Playtime arrays
 		foreach ($this->playtimes as $playtime) {
 			$actual[ $playtime->appid ] = $playtime->playtime;
 		}
-
 		foreach ($previousRequest->playtimes as $playtime) {
 			$previous[ $playtime->appid ] = $playtime->playtime;
 		}
 
+		// Computes de delta between requests and generate PlaytimeDelta instance
 		foreach ($actual as $appid => $playtime) {
-			$delta = 0;
-
+			// If no previous playtime exist, the delta is the actual playtime
 			if (array_key_exists($appid, $previous)) {
 				$delta = $actual[ $appid ] - $previous[ $appid ];
 			} else {
 				$delta = $actual[ $appid ];
 			}
+
+			// Only logs deltas that changed
 			if ($delta > 0) {
 				// Check if there are duplicates
 				$playtimeDelta = PlaytimeDelta::make();
@@ -89,6 +94,8 @@ class PlaytimeRequest extends Model
 
 				$playtimeDelta->gameInfo()->associate(GameInfo::find($appid));
 				$playtimeDelta->playtimeRequest()->associate($this);
+
+				// Allows PlaytimeDeltas grouping to be exactly like PlaytimeRequests
 				$playtimeDelta->created_at = $this->created_at;
 				$playtimeDelta->updated_at = $this->updated_at;
 

@@ -26,6 +26,9 @@ class UsersController extends Controller
 
 	public function storeSettings(Request $request)
 	{
+		$request->validate([
+			'timezone' => 'required|timezone',
+		]);
 
 		$user = Auth::user();
 
