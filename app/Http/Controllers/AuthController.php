@@ -41,12 +41,17 @@ class AuthController extends Controller
 		return $this->steam->redirect();
 	}
 
+	public function login()
+	{
+		return view('login');
+	}
+
 	/**
 	 * Get user info and log in.
 	 *
 	 * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
 	 */
-	public function login()
+	public function handle()
 	{
 		if ($this->steam->validate()) {
 			$info = $this->steam->getUserInfo();

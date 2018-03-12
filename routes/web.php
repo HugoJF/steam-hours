@@ -16,6 +16,10 @@ Route::group(['prefix' => 'admin'], function () {
 });
 
 Route::get('login', 'AuthController@login')->name('login');
+
+
+Route::get('auth/steam', 'AuthController@redirectToSteam')->name('redirectToSteam');
+Route::get('auth/steam/handle', 'AuthController@handle')->name('handle');
 Route::get('logout', 'Auth\LoginController@logout')->name('logout');
 
 
