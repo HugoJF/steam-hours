@@ -16,7 +16,7 @@ class FillPlaytime extends Command
 	 *
 	 * @var string
 	 */
-	protected $signature = 'playtime:fill {amount=200}';
+	protected $signature = 'playtime:fill {--amount=200}';
 
 	/**
 	 * The console command description.
